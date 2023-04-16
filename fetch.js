@@ -1,11 +1,17 @@
 const mouseGrid = document.getElementById('mice');
 
 const pushEntriesToGrid = (arrayOfEntries) => {
+	console.log(arrayOfEntries);
 	arrayOfEntries.map((entry) => {
+		if (entry.post_hint !== 'image') {
+			return;
+		}
 		const mousePicture = document.createElement('img');
 		mousePicture.src = entry.url;
+		const figure = document.createElement('figure');
+		figure.appendChild(mousePicture);
 	
-		mouseGrid.appendChild(mousePicture);
+		mouseGrid.appendChild(figure);
 	});
 
 	// remove loading image
@@ -13,7 +19,7 @@ const pushEntriesToGrid = (arrayOfEntries) => {
 };
 
 fetch(
-	`https://api.reddit.com/r/PetMice/search.json?q=flair%3A%22Adorable%22&restrict_sr=on&sort=top&t=week&limit=100`
+	`https://api.reddit.com/r/PetMice/search.json?q=flair%3A%22Adorable%22&restrict_sr=on&sort=top`
   )
 	.then((res) => res.json())
 	.then((data) => data.data.children.map((data) => data.data))
