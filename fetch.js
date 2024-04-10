@@ -30,8 +30,9 @@ const pushEntriesToGrid = (arrayOfEntries) => {
 	});
 
 	// remove loading image
-	document.getElementById('loading').remove();
+	document.getElementById('loading-placeholder').remove();
 	mouseGrid.classList.remove('to-be-loaded');
+	document.getElementsByTagName('body')[0].classList.remove('loading');
 };
 
 fetch(

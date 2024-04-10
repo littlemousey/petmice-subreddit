@@ -1,6 +1,15 @@
 body {
-	background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+	background: linear-gradient(#101434, #1767d0);
+	color: white;
 	text-align: center;
+}
+
+body.loading {
+	height: 100vh;
+}
+
+h1 {
+	text-decoration: underline;
 }
 
 .container {
@@ -17,6 +26,7 @@ body {
 img {
 	max-width: 100%;
 	display: block;
+	border-radius: 5px;
 }
 
 figure {
