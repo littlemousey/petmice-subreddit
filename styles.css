@@ -1,5 +1,6 @@
 body {
 	background: linear-gradient(#101434, #1767d0);
+	cursor: url('mouse-cursor.png'), auto;
 	color: white;
 	text-align: center;
 }
