@@ -36,7 +36,7 @@ const pushEntriesToGrid = (arrayOfEntries) => {
 };
 
 fetch(
-	`https://api.reddit.com/r/PetMice/search.json?q=flair%3A"Cute%20Mouse%20Media"&restrict_sr=on&sort=top&t=week&limit=100`
+	`https://api.reddit.com/r/PetMice/search.json?q=flair%3A"Cute%20Mouse%20Media"&restrict_sr=on&sort=top&t=month&limit=100`
   )
 	.then((res) => res.json())
 	.then((data) => data.data.children.map((data) => data.data))
