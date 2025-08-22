@@ -1,18 +1,7 @@
-.kalam-light {
-    font-family: "Kalam", cursive;
-    font-weight: 300;
-    font-style: normal;
-  }
-  
-  .kalam-regular {
-    font-family: "Kalam", cursive;
-    font-weight: 400;
-    font-style: normal;
-  }
-  
-  .kalam-bold {
-    font-family: "Kalam", cursive;
-    font-weight: 700;
-    font-style: normal;
-  }
-  
+
+.edu-nsw-act-cursive-font {
+  font-family: "Edu NSW ACT Cursive", cursive;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
