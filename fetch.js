@@ -11,6 +11,11 @@ const pushEntriesToGrid = (arrayOfEntries) => {
 			mousePicture.src = entry.url;
 			const figure = document.createElement('figure');
 			figure.appendChild(mousePicture);
+			
+			// Add title as figcaption
+			const figCaption = document.createElement('figcaption');
+			figCaption.textContent = entry.title;
+			figure.appendChild(figCaption);
 		
 			miceImages.appendChild(figure);
 		}
