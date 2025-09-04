@@ -1,6 +1,15 @@
 body {
-	background: #020024;
-	background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(112, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%);
+	background: #ff0000;
+	background: linear-gradient(45deg, 
+		#ff0000 0%,    /* Red */
+		#ff8000 14%,   /* Orange */
+		#ffff00 28%,   /* Yellow */
+		#80ff00 42%,   /* Yellow-Green */
+		#00ff00 56%,   /* Green */
+		#00ff80 70%,   /* Green-Cyan */
+		#00ffff 84%,   /* Cyan */
+		#0080ff 100%   /* Blue */
+	);
 	cursor: url('./assets/mouse-cursor.png'), auto;
 	color: white;
 	text-align: center;
@@ -28,14 +37,9 @@ body.loading {
 	}
 }
 
-@media screen and (min-width: 1400px) {
+@media screen and (min-width: 1900px) {
 	.container {
 		grid-template-columns: repeat(7, 1fr);
-	}
-}
-@media screen and (min-width: 1600px) {
-	.container {
-		grid-template-columns: repeat(9, 1fr);
 	}
 }
 
