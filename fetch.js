@@ -5,34 +5,82 @@ const miceImages = document.getElementById('mouse-images');
 
 const pushEntriesToGrid = (arrayOfEntries) => {
 	console.log(arrayOfEntries);
-	arrayOfEntries.map((entry) => {
-		if (entry.post_hint === 'image') {
-			const mousePicture = document.createElement('img');
-			mousePicture.src = entry.url;
-			const figure = document.createElement('figure');
-			figure.appendChild(mousePicture);
-			
-			// Add title as figcaption
-			const figCaption = document.createElement('figcaption');
-			figCaption.textContent = entry.title;
-			figure.appendChild(figCaption);
-		
-			miceImages.appendChild(figure);
-		}
+    arrayOfEntries.map((entry) => {
+        let mediaUrl = null;
+        let mediaType = 'image'; // default to image
+        
+        // Case 1: Direct image posts
+        if ((entry.post_hint === 'image') || 
+            (entry.url && (entry.url.endsWith('.jpg') || entry.url.endsWith('.jpeg') || 
+                          entry.url.endsWith('.png') || entry.url.endsWith('.gif')))) {
+            mediaUrl = entry.url;
+            mediaType = 'image';
+        }
+        // Case 2: Video posts
+        else if (entry.post_hint === 'hosted:video' || entry.post_hint === 'rich:video') {
+            if (entry.media && entry.media.reddit_video && entry.media.reddit_video.fallback_url) {
+                mediaUrl = entry.media.reddit_video.fallback_url;
+                mediaType = 'video';
+            }
+            // Fallback to preview image for videos
+            else if (entry.preview && entry.preview.images && entry.preview.images.length > 0) {
+                const largestPreview = entry.preview.images[0].source;
+                mediaUrl = largestPreview.url.replace(/&amp;/g, '&');
+                mediaType = 'image';
+            }
+        }
+        // Case 3: Image previews (for link posts that have image previews)
+        else if (entry.preview && entry.preview.images && entry.preview.images.length > 0) {
+            const largestPreview = entry.preview.images[0].source;
+            mediaUrl = largestPreview.url.replace(/&amp;/g, '&');
+            mediaType = 'image';
+        }
+        // Case 4: Gallery posts (first image)
+        else if (entry.is_gallery && entry.media_metadata) {
+            const mediaIds = Object.keys(entry.media_metadata);
+            if (mediaIds.length > 0) {
+                const firstMediaId = mediaIds[0];
+                const mediaItem = entry.media_metadata[firstMediaId];
+                if (mediaItem.s && mediaItem.s.u) {
+                    mediaUrl = mediaItem.s.u.replace(/&amp;/g, '&');
+                    mediaType = 'image';
+                }
+            }
+        }
+        // Case 5: Self posts with thumbnail
+        else if (entry.thumbnail && entry.thumbnail !== 'self' && entry.thumbnail !== 'default' && entry.thumbnail !== 'nsfw') {
+            mediaUrl = entry.thumbnail;
+            mediaType = 'image';
+        }
+        
+        // If we found media, add it to the grid
+        if (mediaUrl) {
+            const figure = document.createElement('figure');
+            
+            if (mediaType === 'video') {
+                const mouseVideo = document.createElement('video');
+                mouseVideo.src = mediaUrl;
+                mouseVideo.controls = true;
+                mouseVideo.muted = true;
+                mouseVideo.loop = true;
+                mouseVideo.preload = 'metadata';
+                figure.appendChild(mouseVideo);
+            } else {
+                const mousePicture = document.createElement('img');
+                mousePicture.src = mediaUrl;
+                figure.appendChild(mousePicture);
+            }
+            
+            // Add title as figcaption
+            const figCaption = document.createElement('figcaption');
+            figCaption.textContent = entry.title;
+            figure.appendChild(figCaption);
+        
+            miceImages.appendChild(figure);
+        }
 
-		if (entry.is_gallery) {
-			const urlGallery = document.createElement('a');
-			urlGallery.setAttribute('href', `${REDDIT_BASE_URL}${entry.permalink}`);
-			const block = document.createElement("blockquote");
-			block.classList.add('reddit-embed-bq');
-			block.setAttribute('data-embed-height', 678);
-			block.style.height = "500px";
-			block.appendChild(urlGallery);
-			miceGalleries.appendChild(block);
-		}
-
-		return;
-	});
+        return;
+    });
 
 	// remove loading image
 	document.getElementById('loading-placeholder').remove();
@@ -41,29 +89,12 @@ const pushEntriesToGrid = (arrayOfEntries) => {
 };
 
 fetch(
-	`https://api.reddit.com/r/PetMice/search.json?q=flair%3A"Cute%20Mouse%20Media"&restrict_sr=on&sort=top&t=month&limit=100`
+	`https://api.reddit.com/r/PetMice/top.json?limit=100&t=week`
   )
 	.then((res) => res.json())
 	.then((data) => data.data.children.map((data) => data.data))
 	.then((array) => pushEntriesToGrid(array))
-	// to get error
 	.catch((err) => console.log(err))
-	.then(() => loadWidgetScript())
-
-const loadWidgetScript = () => {
-	const scriptPromise = new Promise((resolve, reject) => {
-		const embedScript = document.createElement('script');
-		document.body.appendChild(embedScript);
-		embedScript.onload = resolve;
-		embedScript.onerror = reject;
-		embedScript.async = true;
-		embedScript.src = 'https://embed.reddit.com/widgets.js';
-	});
-
-	scriptPromise.catch((err) => {
-		console.error(err);
-	});
-}
 
 
 // these work

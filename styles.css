@@ -60,6 +60,14 @@ figure img {
 	margin-bottom: 10px;
 }
 
+figure video {
+	width: 230px;         /* Same width as images */
+	height: 270px;        /* Same height as images */
+	object-fit: cover;    /* Ensures the video covers the area */
+	margin-bottom: 10px;
+	border-radius: 2px;   /* Slight rounding for a nicer look */
+}
+
 figure a {
 	color: black;
 	text-decoration: none;
