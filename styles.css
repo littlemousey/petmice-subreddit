@@ -30,14 +30,21 @@ body.loading {
 	justify-items: center;
 }
 
-/* Desktop layout: 5 columns when screen is wider */
-@media screen and (min-width: 768px) {
+/* Tablet layout */
+@media screen and (min-width: 600px) {
+	.container {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+/* Desktop layout */
+@media screen and (min-width: 1600px) {
 	.container {
 		grid-template-columns: repeat(5, 1fr);
 	}
 }
 
-@media screen and (min-width: 1900px) {
+@media screen and (min-width: 2200px) {
 	.container {
 		grid-template-columns: repeat(7, 1fr);
 	}
