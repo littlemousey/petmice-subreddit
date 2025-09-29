@@ -4,7 +4,7 @@ const miceGalleries = document.getElementById('mouse-galleries');
 const miceImages = document.getElementById('mouse-images');
 
 const pushEntriesToGrid = (arrayOfEntries) => {
-	console.log(arrayOfEntries);
+    console.log(arrayOfEntries);
     arrayOfEntries.map((entry) => {
         let mediaUrl = null;
         let mediaType = 'image'; // default to image
@@ -68,6 +68,10 @@ const pushEntriesToGrid = (arrayOfEntries) => {
             } else {
                 const mousePicture = document.createElement('img');
                 mousePicture.src = mediaUrl;
+                // Add error handling for images that fail to load
+                mousePicture.onerror = function() {
+                    figure.remove();
+                };
                 figure.appendChild(mousePicture);
             }
             
@@ -82,20 +86,61 @@ const pushEntriesToGrid = (arrayOfEntries) => {
         return;
     });
 
-	// remove loading image
-	document.getElementById('loading-placeholder').remove();
-	mouseGrid.classList.remove('to-be-loaded');
-	document.getElementsByTagName('body')[0].classList.remove('loading');
+    // remove loading image with null check
+    const loadingPlaceholder = document.getElementById('loading-placeholder');
+    if (loadingPlaceholder) {
+        loadingPlaceholder.remove();
+    }
+    mouseGrid.classList.remove('to-be-loaded');
+    document.getElementsByTagName('body')[0].classList.remove('loading');
 };
 
-fetch(
-	`https://api.reddit.com/r/PetMice/top.json?limit=100&t=week`
-  )
-	.then((res) => res.json())
-	.then((data) => data.data.children.map((data) => data.data))
-	.then((array) => pushEntriesToGrid(array))
-	.catch((err) => console.log(err))
+// Add timeout wrapper function
+const fetchWithTimeout = (url, timeout = 15000) => {
+    return Promise.race([
+        fetch(url),
+        new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), timeout)
+        )
+    ]);
+};
 
+// Show error message function
+const showErrorMessage = (err) => {
+    const loadingPlaceholder = document.getElementById('loading-placeholder');
+    if (loadingPlaceholder) {
+        loadingPlaceholder.innerHTML = `<p>Error: ${err}</p>`;
+    }
+    mouseGrid.classList.remove('to-be-loaded');
+    document.getElementsByTagName('body')[0].classList.remove('loading');
+};
+
+// Use one of your working URLs with better error handling
+fetchWithTimeout(
+    `https://www.reddit.com/r/PetMice/top.json?limit=100&t=week&raw_json=1`
+)
+    .then((res) => {
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+    })
+    .then((data) => {
+        if (!data.data || !data.data.children) {
+            throw new Error('Invalid response format');
+        }
+        return data.data.children.map((data) => data.data);
+    })
+    .then((array) => {
+        if (array.length === 0) {
+            throw new Error('No posts found');
+        }
+        pushEntriesToGrid(array);
+    })
+    .catch((err) => {
+        console.error('Fetch error:', err);
+        showErrorMessage(err);
+    });
 
 // these work
 // http://www.reddit.com/search.json?q=mice&limit=100
