@@ -106,41 +106,84 @@ const fetchWithTimeout = (url, timeout = 15000) => {
 };
 
 // Show error message function
-const showErrorMessage = (err) => {
+const showErrorMessage = (err, retryCallback) => {
     const loadingPlaceholder = document.getElementById('loading-placeholder');
     if (loadingPlaceholder) {
-        loadingPlaceholder.innerHTML = `<p>Error: ${err}</p>`;
+        loadingPlaceholder.innerHTML = `
+            <p>Error: ${err}</p>
+            <button id="retry-btn" style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-top: 10px;">
+                Retry Loading
+            </button>
+        `;
+        
+        const retryBtn = document.getElementById('retry-btn');
+        if (retryBtn && retryCallback) {
+            retryBtn.addEventListener('click', retryCallback);
+        }
     }
     mouseGrid.classList.remove('to-be-loaded');
     document.getElementsByTagName('body')[0].classList.remove('loading');
 };
 
-// Use one of your working URLs with better error handling
-fetchWithTimeout(
-    `https://www.reddit.com/r/PetMice/top.json?limit=100&t=week&raw_json=1`
-)
-    .then((res) => {
-        if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
+// Fetch function with retry logic
+const fetchMice = (retryCount = 0, maxRetries = 3) => {
+    // Show retry attempt in loading message
+    const loadingPlaceholder = document.getElementById('loading-placeholder');
+    if (retryCount > 0 && loadingPlaceholder) {
+        const loadingText = loadingPlaceholder.querySelector('p');
+        if (loadingText) {
+            loadingText.textContent = `Retrying... (Attempt ${retryCount + 1}/${maxRetries + 1})`;
         }
-        return res.json();
-    })
-    .then((data) => {
-        if (!data.data || !data.data.children) {
-            throw new Error('Invalid response format');
-        }
-        return data.data.children.map((data) => data.data);
-    })
-    .then((array) => {
-        if (array.length === 0) {
-            throw new Error('No posts found');
-        }
-        pushEntriesToGrid(array);
-    })
-    .catch((err) => {
-        console.error('Fetch error:', err);
-        showErrorMessage(err);
-    });
+    }
+
+    fetchWithTimeout(
+        `https://www.reddit.com/r/PetMice/top.json?limit=100&t=week&raw_json=1`,
+        15000 + (retryCount * 5000) // Increase timeout with each retry
+    )
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
+        .then((data) => {
+            if (!data.data || !data.data.children) {
+                throw new Error('Invalid response format');
+            }
+            return data.data.children.map((data) => data.data);
+        })
+        .then((array) => {
+            if (array.length === 0) {
+                throw new Error('No posts found');
+            }
+            pushEntriesToGrid(array);
+        })
+        .catch((err) => {
+            console.error('Fetch error:', err);
+            
+            // Retry logic
+            if (retryCount < maxRetries) {
+                console.log(`Retrying... attempt ${retryCount + 1} of ${maxRetries}`);
+                setTimeout(() => fetchMice(retryCount + 1, maxRetries), 2000 * (retryCount + 1)); // Exponential backoff
+            } else {
+                showErrorMessage(err.message, () => {
+                    // Reset UI for manual retry
+                    const loadingPlaceholder = document.getElementById('loading-placeholder');
+                    if (loadingPlaceholder) {
+                        loadingPlaceholder.innerHTML = `
+                            <img id="loading-img" alt="loading" src="./assets/loading-mouse.gif" />
+                            <p>Hold on, mice incoming...</p>
+                        `;
+                    }
+                    document.getElementsByTagName('body')[0].classList.add('loading');
+                    fetchMice(0, maxRetries); // Start fresh retry
+                });
+            }
+        });
+};
+
+// Start the initial fetch
+fetchMice();
 
 // these work
 // http://www.reddit.com/search.json?q=mice&limit=100
