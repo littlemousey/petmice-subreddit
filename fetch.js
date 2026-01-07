@@ -1,4 +1,4 @@
-const REDDIT_BASE_URL = 'https://www.reddit.com';
+const REDDIT_API_QUERY= 'https://www.reddit.com/r/PetMice/top.json?limit=100&t=week&raw_json=1';
 const mouseGrid = document.getElementById('fetched-mice');
 const miceGalleries = document.getElementById('mouse-galleries');
 const miceImages = document.getElementById('mouse-images');
@@ -136,8 +136,9 @@ const fetchMice = (retryCount = 0, maxRetries = 3) => {
         }
     }
 
+    // Fixes CORS Errors
     fetchWithTimeout(
-        `https://www.reddit.com/r/PetMice/top.json?limit=100&t=week&raw_json=1`,
+        `https://corsproxy.io/?${encodeURIComponent(REDDIT_API_QUERY)}`,
         15000 + (retryCount * 5000) // Increase timeout with each retry
     )
         .then((res) => {
