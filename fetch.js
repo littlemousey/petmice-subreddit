@@ -138,7 +138,7 @@ const fetchMice = (retryCount = 0, maxRetries = 3) => {
 
     // Fixes CORS Errors
     fetchWithTimeout(
-        `https://corsproxy.io/?${encodeURIComponent(REDDIT_API_QUERY)}`,
+        `https://cors-anywhere.com/${REDDIT_API_QUERY}`,
         15000 + (retryCount * 5000) // Increase timeout with each retry
     )
         .then((res) => {
