@@ -136,9 +136,15 @@ const fetchMice = (retryCount = 0, maxRetries = 3) => {
         }
     }
 
+    // Check if running on GitHub Pages
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    const apiUrl = isGitHubPages 
+        ? `https://cors-anywhere.com/${REDDIT_API_QUERY}`
+        : REDDIT_API_QUERY;
+
     // Fixes CORS Errors
     fetchWithTimeout(
-        `https://cors-anywhere.com/${REDDIT_API_QUERY}`,
+        apiUrl,
         15000 + (retryCount * 5000) // Increase timeout with each retry
     )
         .then((res) => {
