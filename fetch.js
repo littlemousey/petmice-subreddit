@@ -1,4 +1,4 @@
-const REDDIT_API_QUERY= 'https://www.reddit.com/r/PetMice/top.json?limit=100&t=week&raw_json=1';
+const REDDIT_API_BASE= 'https://api.pullpush.io/reddit/search/submission/?subreddit=PetMice&size=100&sort=desc&sort_type=created_utc';
 const mouseGrid = document.getElementById('fetched-mice');
 const miceGalleries = document.getElementById('mouse-galleries');
 const miceImages = document.getElementById('mouse-images');
@@ -136,13 +136,8 @@ const fetchMice = (retryCount = 0, maxRetries = 3) => {
         }
     }
 
-    // Check if running on GitHub Pages
-    const isGitHubPages = window.location.hostname.includes('github.io');
-    const apiUrl = isGitHubPages 
-        ? `https://cors-anywhere.com/${REDDIT_API_QUERY}`
-        : REDDIT_API_QUERY;
+    const apiUrl = REDDIT_API_BASE;
 
-    // Fixes CORS Errors
     fetchWithTimeout(
         apiUrl,
         15000 + (retryCount * 5000) // Increase timeout with each retry
@@ -154,10 +149,10 @@ const fetchMice = (retryCount = 0, maxRetries = 3) => {
             return res.json();
         })
         .then((data) => {
-            if (!data.data || !data.data.children) {
+            if (!data.data || !Array.isArray(data.data)) {
                 throw new Error('Invalid response format');
             }
-            return data.data.children.map((data) => data.data);
+            return data.data;
         })
         .then((array) => {
             if (array.length === 0) {
