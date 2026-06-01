@@ -105,6 +105,20 @@ const fetchWithTimeout = (url, timeout = 15000) => {
     ]);
 };
 
+// Show fallback warning banner
+const showFallbackWarning = (date) => {
+    const warning = document.createElement('p');
+    warning.id = 'fallback-warning';
+    warning.textContent = `API is not responding, showing data from ${date}`;
+    document.body.insertAdjacentElement('afterbegin', warning);
+};
+
+// Load fallback data when all retries are exhausted
+const loadFallbackData = () => {
+    showFallbackWarning(FALLBACK_DATA.date);
+    pushEntriesToGrid(FALLBACK_DATA.children);
+};
+
 // Show error message function
 const showErrorMessage = (err, retryCallback) => {
     const loadingPlaceholder = document.getElementById('loading-placeholder');
@@ -115,7 +129,7 @@ const showErrorMessage = (err, retryCallback) => {
                 Retry Loading
             </button>
         `;
-        
+
         const retryBtn = document.getElementById('retry-btn');
         if (retryBtn && retryCallback) {
             retryBtn.addEventListener('click', retryCallback);
@@ -173,18 +187,7 @@ const fetchMice = (retryCount = 0, maxRetries = 3) => {
                 console.log(`Retrying... attempt ${retryCount + 1} of ${maxRetries}`);
                 setTimeout(() => fetchMice(retryCount + 1, maxRetries), 2000 * (retryCount + 1)); // Exponential backoff
             } else {
-                showErrorMessage(err.message, () => {
-                    // Reset UI for manual retry
-                    const loadingPlaceholder = document.getElementById('loading-placeholder');
-                    if (loadingPlaceholder) {
-                        loadingPlaceholder.innerHTML = `
-                            <img id="loading-img" alt="loading" src="./assets/loading-mouse.gif" />
-                            <p>Hold on, mice incoming...</p>
-                        `;
-                    }
-                    document.getElementsByTagName('body')[0].classList.add('loading');
-                    fetchMice(0, maxRetries); // Start fresh retry
-                });
+                loadFallbackData();
             }
         });
 };

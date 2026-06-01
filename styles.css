@@ -54,6 +54,15 @@ body.loading {
 	display: none;
 }
 
+#fallback-warning {
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
+	font-size: 0.9em;
+	padding: 8px 16px;
+	margin: 0;
+	text-align: center;
+}
+
 img {
 	max-width: 100%;
 	display: block;
